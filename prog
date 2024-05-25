@@ -1,0 +1,199 @@
+#include <LiquidCrystal.h>
+#define buttonA 6
+#define buttonB 7
+#define buttonC 8
+#define buzzer 9
+#define led 10
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+int timerPlayer1, timerPlayer2;
+int min = 0, sec = 0;
+int min1, sec1, min2, sec2;
+
+void setup()
+{
+  lcd.begin(16, 2);
+  lcd.clear();
+  
+  pinMode(buttonA, INPUT_PULLUP);
+  pinMode(buttonB, INPUT_PULLUP);
+  pinMode(buttonC, INPUT_PULLUP);
+  pinMode(buzzer, OUTPUT);
+  pinMode(led, OUTPUT);
+
+  digitalWrite(led, LOW);
+  analogWrite(buzzer, 0);
+
+  while(!digitalRead(buttonB))
+  {
+    lcd.clear();
+
+  }
+  while(digitalRead(buttonB));
+
+  lcd.setCursor(0,0);
+  lcd.print("SECONDS CONFIG. ");
+  lcd.setCursor(4, 1);
+  lcd.print(min);
+  lcd.print(":");
+  lcd.print(sec);
+
+  //config seconds
+  while(!digitalRead(buttonB))
+  {
+    if(digitalRead(buttonA) && sec > 0)
+    {
+      while(digitalRead(buttonA));
+      sec -= 10;
+    }
+    if(digitalRead(buttonA) && sec == 0)
+    {
+      while(digitalRead(buttonA));
+      sec = 50;
+    }
+    if(digitalRead(buttonC) && sec < 50)
+    {
+      while(digitalRead(buttonC));
+      sec += 10;
+    }
+    if(digitalRead(buttonC) && sec == 50)
+    {
+      while(digitalRead(buttonC));
+      sec = 0;
+    }
+
+    lcd.setCursor(4, 1);
+    lcd.print(min);
+    lcd.print(":");
+    lcd.print(sec);
+    lcd.print("   ");
+
+    delay(250);
+  }
+  while(digitalRead(buttonB));
+  lcd.setCursor(0,0);
+  lcd.print("MINUTES CONFIG. ");
+
+  //config minutes
+  while(!digitalRead(buttonB))
+  {
+    if(digitalRead(buttonA) && min > 0)
+    {
+      while(digitalRead(buttonA));
+      min--;
+    }
+    if(digitalRead(buttonA) && min == 0)
+    {
+      while(digitalRead(buttonA));
+      min = 10;
+    }
+    if(digitalRead(buttonC) && min < 10)
+    {
+      while(digitalRead(buttonC));
+      min++;
+    }
+    if(digitalRead(buttonC) && min == 10)
+    {
+      while(digitalRead(buttonC));
+      min = 0;
+    }
+
+    lcd.setCursor(4, 1);
+    lcd.print(min);
+    lcd.print(":");
+    lcd.print(sec);
+    lcd.print("   ");
+
+    delay(250);
+  }
+  lcd.setCursor(0,0);
+  lcd.print("READY, Press ENT");
+
+  while(!digitalRead(buttonB));
+  while(digitalRead(buttonB));
+  lcd.setCursor(0,0);
+  lcd.print("P1            P2");
+
+}
+
+void loop()
+{
+  min1 = min;
+  min2 = min;
+  sec1 = sec;
+  sec2 = sec;
+  unsigned long int aux;
+
+  while(true)
+  {
+    aux = millis();
+
+    //timer player 1
+    while(!digitalRead(buttonC))
+    {
+      if(millis() - aux >= 999)
+      {
+        aux = millis();
+        if(sec1 > 0)
+          sec1--;
+        if(sec1 == 0)
+        {
+          if(min1 > 0)
+            min1--;
+          if(min1 == 0 && sec1 == 0)
+          {
+            print_timer();
+            //buzzer
+            digitalWrite(led, HIGH);
+            analogWrite(buzzer, 125);
+            while(true);
+          }
+          sec1 = 59;
+        }
+      }
+
+      print_timer();
+    }
+    //timer player 2
+    while(!digitalRead(buttonA))
+    {
+      if(millis() - aux >= 999)
+      {
+        aux = millis();
+        if(sec2 > 0)
+          sec2--;
+        if(sec2 == 0)
+        {
+          if(min2 > 0)
+            min2--;
+          if(min2 == 0 && sec2 == 0)
+          {
+            print_timer();
+            //buzzer
+            digitalWrite(led, HIGH);
+            analogWrite(buzzer, 125);
+            while(true);
+          }
+          sec2 = 59;
+        }
+      }
+
+      print_timer();
+    }
+  }
+}
+
+void print_timer()
+{
+  lcd.setCursor(0,1);
+  lcd.print(min1);
+  lcd.print(":");
+  lcd.print(sec1);
+  lcd.print("    ");
+  lcd.setCursor(11,1);
+  lcd.print(min2);
+  lcd.print(":");
+  lcd.print(sec2);
+  lcd.print("  ");
+}
